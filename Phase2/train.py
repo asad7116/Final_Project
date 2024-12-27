@@ -6,10 +6,10 @@ from preprocess import load_data
 import os
 
 # Load data for all 4 classes
-X_hearts, y_hearts = load_data("D:/Semester_5/AI/Final_Project/dataSet/Hearts", label=0)
-X_diamonds, y_diamonds = load_data("D:/Semester_5/AI/Final_Project/dataSet/Diamonds", label=1)
-X_clubs, y_clubs = load_data("D:/Semester_5/AI/Final_Project/dataSet/Clubs", label=2)
-X_spades, y_spades = load_data("D:/Semester_5/AI/Final_Project/dataSet/Spades", label=3)
+X_hearts, y_hearts = load_data("D:/Semester_5/AI/Final_Project/dataSet/train/Hearts", label=0)
+X_diamonds, y_diamonds = load_data("D:/Semester_5/AI/Final_Project/dataSet/train/Diamonds", label=1)
+X_clubs, y_clubs = load_data("D:/Semester_5/AI/Final_Project/dataSet/train/Clubs", label=2)
+X_spades, y_spades = load_data("D:/Semester_5/AI/Final_Project/dataSet/train/Spades", label=3)
 # X_joker, y_joker = load_data("D:/Semester_5/AI/Final_Project/dataSet/Jokers", label=4)  # Comment out Joker
 
 # Combine data
@@ -36,7 +36,7 @@ ann = SimpleANN(input_size=input_size, hidden_size1=hidden_layer_size1, hidden_s
 learning_rate = 0.01  # Decrease learning rate
 
 # Train the model
-ann.train(X_train, y_train, epochs=20000, learning_rate=learning_rate)  # Increase epochs
+ann.train(X_train, y_train, epochs=5000, learning_rate=learning_rate)  # Reduce epochs
 
 # Evaluate the model
 y_pred = ann.predict(X_test)

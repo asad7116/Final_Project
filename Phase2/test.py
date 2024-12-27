@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 # Path to the image
-test_image_path = r"D:\Semester_5\AI\Final_Project\dataset1\test\ten of spades\1.jpg"
+test_image_path = r"D:\Semester_5\AI\Final_Project\dataSet\train\Clubs\Clubs1_1.jpg"
 
 # Check if the image exists
 if not os.path.exists(test_image_path):
