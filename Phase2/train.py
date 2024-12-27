@@ -1,52 +1,51 @@
-import numpy as np
-import os
 from sklearn.model_selection import train_test_split
-from ann import SimpleANN as ANN  # Ensure ANN implementation is in the same directory
-from utils import load_data, preprocess_image
+from sklearn.preprocessing import OneHotEncoder
+import numpy as np
+from ann import SimpleANN  # Ensure this matches your ANN class name
+from preprocess import load_data
+import os
 
-# Parameters
-learning_rate = 0.1  # Increased from 0.01
-hidden_layer_size = 16  # Increased from 8
-epochs = 2000  # Increased from 1000
+# Load data for all 4 classes
+X_hearts, y_hearts = load_data("D:/Semester_5/AI/Final_Project/dataSet/Hearts", label=0)
+X_diamonds, y_diamonds = load_data("D:/Semester_5/AI/Final_Project/dataSet/Diamonds", label=1)
+X_clubs, y_clubs = load_data("D:/Semester_5/AI/Final_Project/dataSet/Clubs", label=2)
+X_spades, y_spades = load_data("D:/Semester_5/AI/Final_Project/dataSet/Spades", label=3)
+# X_joker, y_joker = load_data("D:/Semester_5/AI/Final_Project/dataSet/Jokers", label=4)  # Comment out Joker
 
-# Load Data
-X_hearts, y_hearts = load_data(r"D:\Semester_5\AI\Final_Project\dataSet\Hearts", label=0)
-X_diamonds, y_diamonds = load_data(r"D:\Semester_5\AI\Final_Project\dataSet\Diamonds", label=1)
+# Combine data
+X = np.vstack((X_hearts, X_diamonds, X_clubs, X_spades))  # Remove Joker
+y = np.hstack((y_hearts, y_diamonds, y_clubs, y_spades))  # Remove Joker
 
-# Combine and Split Data
-X = np.vstack((X_hearts, X_diamonds))
-y = np.hstack((y_hearts, y_diamonds))
+# One-hot encode labels for 4 classes
+encoder = OneHotEncoder(sparse_output=False)
+y = encoder.fit_transform(y.reshape(-1, 1))
+
+# Split into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Initialize ANN
-ann = ANN(input_size=X_train.shape[1], hidden_size=hidden_layer_size, output_size=2, learning_rate=learning_rate)
-def one_hot_encode(y, num_classes):
-    return np.eye(num_classes)[y]
+# Update input size to 64x64
+input_size = 64 * 64
 
-# Assuming binary classification
-y_train_one_hot = one_hot_encode(y_train, num_classes=2)
+# Initialize ANN with additional hidden layer
+hidden_layer_size1 = 512  # First hidden layer size
+hidden_layer_size2 = 512  # Second hidden layer size
+output_size = 4  # 4 classes
+ann = SimpleANN(input_size=input_size, hidden_size1=hidden_layer_size1, hidden_size2=hidden_layer_size2, output_size=output_size)
 
-# Now, pass y_train_one_hot to ANN
-loss = ann.train(X_train, y_train_one_hot)
+# Set the learning rate (e.g., 0.1)
+learning_rate = 0.01  # Decrease learning rate
 
-# Training
-losses = []
-for epoch in range(epochs):
-    loss = ann.train(X_train, y_train)
-    losses.append(loss)
-    if epoch % 100 == 0:
-        print(f"Epoch {epoch}, Loss: {loss:.4f}")
+# Train the model
+ann.train(X_train, y_train, epochs=20000, learning_rate=learning_rate)  # Increase epochs
 
-# Debug: Training Accuracy
-predictions_train = ann.predict(X_train)
-train_accuracy = np.sum(predictions_train == y_train) / y_train.size * 100
-print(f"Training Accuracy: {train_accuracy:.2f}%")
+# Evaluate the model
+y_pred = ann.predict(X_test)
+y_pred_labels = np.argmax(y_pred, axis=1)  # Convert one-hot encoded predictions to class labels
+y_test_labels = np.argmax(y_test, axis=1)  # Convert one-hot encoded labels to class labels
 
-# Debug: Test Accuracy
-predictions_test = ann.predict(X_test)
-test_accuracy = np.sum(predictions_test == y_test) / y_test.size * 100
-print(f"Test Accuracy: {test_accuracy:.2f}%")
-
-# Save Model
-np.save("weights_input_hidden.npy", ann.weights_input_hidden)
-np.save("weights_hidden_output.npy", ann.weights_hidden_output)
+accuracy = np.mean(y_pred_labels == y_test_labels) * 100
+print(f"Accuracy on Test Set: {accuracy:.2f}%")
+# Save weights
+np.save("weights_input_hidden1.npy", ann.weights_input_hidden1)
+np.save("weights_hidden1_hidden2.npy", ann.weights_hidden1_hidden2)
+np.save("weights_hidden2_output.npy", ann.weights_hidden2_output)
